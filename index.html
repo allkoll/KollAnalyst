@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KollAnalyst - Proficiency Graph</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f7f7f7;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        input {
+            width: 50px;
+            padding: 5px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h2>KollAnalyst - Proficiency Level Distribution</h2>
+
+<table id="teacher-table">
+    <thead>
+        <tr>
+            <th>Teacher</th>
+            <th>4s</th>
+            <th>3s</th>
+            <th>2s</th>
+            <th>1s</th>
+            <th>Ns</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr id="teacher1-row">
+            <td>Teacher 1</td>
+            <td><input type="number" id="fours1" value="0"></td>
+            <td><input type="number" id="threes1" value="0"></td>
+            <td><input type="number" id="twos1" value="0"></td>
+            <td><input type="number" id="ones1" value="0"></td>
+            <td><input type="number" id="ns1" value="0"></td>
+        </tr>
+    </tbody>
+</table>
+
+<button onclick="addTeacher()">Add Another Teacher</button>
+<button onclick="updateGraph()">Graph Proficiency</button>
+
+<div id="graph-container">
+    <div id="graph"></div>
+</div>
+
+<script>
+    let teacherCount = 1;
+
+    function addTeacher() {
+        teacherCount++;
+        const tableBody = document.querySelector("#teacher-table tbody");
+        const newRow = document.createElement('tr');
+        newRow.id = `teacher${teacherCount}-row`;
+        newRow.innerHTML = `
+            <td>Teacher ${teacherCount}</td>
+            <td><input type="number" id="fours${teacherCount}" value="0"></td>
+            <td><input type="number" id="threes${teacherCount}" value="0"></td>
+            <td><input type="number" id="twos${teacherCount}" value="0"></td>
+            <td><input type="number" id="ones${teacherCount}" value="0"></td>
+            <td><input type="number" id="ns${teacherCount}" value="0"></td>
+        `;
+        tableBody.appendChild(newRow);
+    }
+
+    function updateGraph() {
+        let totalFours = 0;
+        let totalThrees = 0;
+        let totalTwos = 0;
+        let totalOnes = 0;
+        let totalNs = 0;
+
+        for (let i = 1; i <= teacherCount; i++) {
+            totalFours += parseInt(document.getElementById(`fours${i}`).value);
+            totalThrees += parseInt(document.getElementById(`threes${i}`).value);
+            totalTwos += parseInt(document.getElementById(`twos${i}`).value);
+            totalOnes += parseInt(document.getElementById(`ones${i}`).value);
+            totalNs += parseInt(document.getElementById(`ns${i}`).value);
+        }
+
+        const total = totalFours + totalThrees + totalTwos + totalOnes + totalNs;
+
+        const proficiencyPercentages = [
+            (totalFours / total * 100).toFixed(2),
+            (totalThrees / total * 100).toFixed(2),
+            (totalTwos / total * 100).toFixed(2),
+            (totalOnes / total * 100).toFixed(2),
+            (totalNs / total * 100).toFixed(2)
+        ];
+
+        const data = [{
+            values: [totalFours, totalThrees, totalTwos, totalOnes, totalNs],
+            labels: ['4s', '3s', '2s', '1s', 'Ns'],
+            type: 'pie',
+            hole: .4,  // Donut chart
+            textinfo: 'label+percent',
+            insidetextorientation: 'radial',
+            marker: {
+                colors: ['#00ffff', '#00ff00', '#ffff00', '#ff0000', '#ff00ff']  // Custom colors for each proficiency level
+            }
+        }];
+
+        const layout = {
+            title: 'Proficiency Level Distribution (%)',
+            showlegend: true
+        };
+
+        Plotly.newPlot('graph', data, layout);
+    }
+</script>
+
+</body>
+</html>
