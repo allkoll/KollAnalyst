@@ -107,6 +107,8 @@
 
         let totals = { fours: 0, threes: 0, twos: 0, ones: 0, ns: 0 };
         let teacherProficiencies = [];
+        let lowScoringTeachers = [];
+        let highScoringTeachers = [];
 
         for (let i = 1; i <= teacherCount; i++) {
             const fours = parseInt(document.getElementById(`fours${i}`).value);
@@ -123,15 +125,28 @@
 
             const totalForTeacher = fours + threes + twos + ones + ns;
 
-            teacherProficiencies.push({
+            const proficiency = {
                 teacher: `Teacher ${i}`,
                 fours: ((fours / totalForTeacher) * 100).toFixed(2),
                 threes: ((threes / totalForTeacher) * 100).toFixed(2),
                 twos: ((twos / totalForTeacher) * 100).toFixed(2),
                 ones: ((ones / totalForTeacher) * 100).toFixed(2),
                 ns: ((ns / totalForTeacher) * 100).toFixed(2),
-                total: totalForTeacher
-            });
+                total: totalForTeacher,
+                totalBelowProficiency: ((ones + twos) / totalForTeacher * 100).toFixed(2), // Calculate below proficiency scores (1s, 2s)
+                totalAtOrAboveProficiency: ((threes + fours) / totalForTeacher * 100).toFixed(2) // Calculate at or above proficiency (3s, 4s)
+            };
+
+            teacherProficiencies.push(proficiency);
+
+            // Identify teachers with significant percentages below proficiency (1s and 2s)
+            if (proficiency.totalBelowProficiency > 50) {
+                lowScoringTeachers.push(proficiency.teacher);
+            }
+            // Identify teachers with significant percentages at or above proficiency (3s and 4s)
+            if (proficiency.totalAtOrAboveProficiency > 50) {
+                highScoringTeachers.push(proficiency.teacher);
+            }
         }
 
         const overallTotal = totals.fours + totals.threes + totals.twos + totals.ones + totals.ns;
@@ -162,10 +177,10 @@
 
         Plotly.newPlot('graph', data, layout);
 
-        generateInsights(proficiencyPercentages, teacherProficiencies);
+        generateInsights(proficiencyPercentages, teacherProficiencies, lowScoringTeachers, highScoringTeachers);
     }
 
-    function generateInsights(overallPercentages, teacherProficiencies) {
+    function generateInsights(overallPercentages, teacherProficiencies, lowScoringTeachers, highScoringTeachers) {
         let overallHighest = Math.max(...overallPercentages.map(Number));
         let overallLowest = Math.min(...overallPercentages.map(Number));
 
@@ -179,35 +194,17 @@
             The lowest overall percentage is ${overallLowest}% for ${overallLevels[overallLowestIndex]}.<br>
         `;
 
-        if (overallHighestIndex === 0) {
-            insights += 'Most students are scoring at the highest proficiency level (4s).<br>';
-        } else if (overallLowestIndex === 0) {
-            insights += 'Very few students are achieving the highest proficiency level (4s).<br>';
+        // Highlight teachers with over 50% of students below proficiency
+        if (lowScoringTeachers.length > 0) {
+            insights += `<br><strong>Areas of Concern:</strong><br>`;
+            insights += `Teachers with significant numbers of students below proficiency: ${lowScoringTeachers.join(', ')}.<br>`;
         }
 
-        insights += '<strong>Teacher-Specific Insights:</strong><br>';
-
-        teacherProficiencies.forEach(proficiency => {
-            const teacher = proficiency.teacher;
-            let teacherHighest = Math.max(
-                proficiency.fours,
-                proficiency.threes,
-                proficiency.twos,
-                proficiency.ones,
-                proficiency.ns
-            );
-            let teacherLowest = Math.min(
-                proficiency.fours,
-                proficiency.threes,
-                proficiency.twos,
-                proficiency.ones,
-                proficiency.ns
-            );
-
-            insights += `
-                ${teacher}: The highest percentage is ${teacherHighest}% and the lowest percentage is ${teacherLowest}%.<br>
-            `;
-        });
+        // Highlight teachers with over 50% of students at or above proficiency
+        if (highScoringTeachers.length > 0) {
+            insights += `<br><strong>Areas of Strength:</strong><br>`;
+            insights += `Teachers with a majority of students at or above proficiency: ${highScoringTeachers.join(', ')}.<br>`;
+        }
 
         document.getElementById('insights').innerHTML = insights;
     }
