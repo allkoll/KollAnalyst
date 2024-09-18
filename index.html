@@ -127,23 +127,23 @@
 
             const proficiency = {
                 teacher: `Teacher ${i}`,
-                fours: ((fours / totalForTeacher) * 100).toFixed(2),
-                threes: ((threes / totalForTeacher) * 100).toFixed(2),
-                twos: ((twos / totalForTeacher) * 100).toFixed(2),
-                ones: ((ones / totalForTeacher) * 100).toFixed(2),
-                ns: ((ns / totalForTeacher) * 100).toFixed(2),
+                fours: totalForTeacher > 0 ? ((fours / totalForTeacher) * 100).toFixed(2) : 0,
+                threes: totalForTeacher > 0 ? ((threes / totalForTeacher) * 100).toFixed(2) : 0,
+                twos: totalForTeacher > 0 ? ((twos / totalForTeacher) * 100).toFixed(2) : 0,
+                ones: totalForTeacher > 0 ? ((ones / totalForTeacher) * 100).toFixed(2) : 0,
+                ns: totalForTeacher > 0 ? ((ns / totalForTeacher) * 100).toFixed(2) : 0,
                 total: totalForTeacher,
-                totalBelowProficiency: ((ones + twos) / totalForTeacher * 100).toFixed(2), // Calculate below proficiency scores (1s, 2s)
-                totalAtOrAboveProficiency: ((threes + fours) / totalForTeacher * 100).toFixed(2) // Calculate at or above proficiency (3s, 4s)
+                totalBelowProficiency: totalForTeacher > 0 ? ((ones + twos) / totalForTeacher * 100).toFixed(2) : 0, // Below proficiency
+                totalAtOrAboveProficiency: totalForTeacher > 0 ? ((threes + fours) / totalForTeacher * 100).toFixed(2) : 0 // At or above proficiency
             };
 
             teacherProficiencies.push(proficiency);
 
-            // Identify teachers with significant percentages below proficiency (1s and 2s)
+            // Identify teachers with over 50% of students below proficiency (1s and 2s)
             if (proficiency.totalBelowProficiency > 50) {
                 lowScoringTeachers.push(proficiency.teacher);
             }
-            // Identify teachers with significant percentages at or above proficiency (3s and 4s)
+            // Identify teachers with over 50% of students at or above proficiency (3s and 4s)
             if (proficiency.totalAtOrAboveProficiency > 50) {
                 highScoringTeachers.push(proficiency.teacher);
             }
@@ -151,11 +151,11 @@
 
         const overallTotal = totals.fours + totals.threes + totals.twos + totals.ones + totals.ns;
         const proficiencyPercentages = [
-            (totals.fours / overallTotal * 100).toFixed(2),
-            (totals.threes / overallTotal * 100).toFixed(2),
-            (totals.twos / overallTotal * 100).toFixed(2),
-            (totals.ones / overallTotal * 100).toFixed(2),
-            (totals.ns / overallTotal * 100).toFixed(2)
+            totals.fours > 0 ? (totals.fours / overallTotal * 100).toFixed(2) : 0,
+            totals.threes > 0 ? (totals.threes / overallTotal * 100).toFixed(2) : 0,
+            totals.twos > 0 ? (totals.twos / overallTotal * 100).toFixed(2) : 0,
+            totals.ones > 0 ? (totals.ones / overallTotal * 100).toFixed(2) : 0,
+            totals.ns > 0 ? (totals.ns / overallTotal * 100).toFixed(2) : 0
         ];
 
         const data = [{
@@ -182,7 +182,7 @@
 
     function generateInsights(overallPercentages, teacherProficiencies, lowScoringTeachers, highScoringTeachers) {
         let overallHighest = Math.max(...overallPercentages.map(Number));
-        let overallLowest = Math.min(...overallPercentages.map(Number));
+        let overallLowest = Math.min(...overallPercentages.map(Number).filter(value => value > 0)); // Avoid zero values
 
         const overallLevels = ['4s', '3s', '2s', '1s', 'Ns'];
         const overallHighestIndex = overallPercentages.indexOf(overallHighest.toString());
