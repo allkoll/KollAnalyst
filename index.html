@@ -148,19 +148,21 @@
 
         Plotly.newPlot('graph', data, layout);
 
-        generateInsights(proficiencyPercentages);
+        generateInsights(proficiencyPercentages, ['4s', '3s', '2s', '1s', 'Ns']);
     }
 
-    function generateInsights(proficiencyPercentages) {
-        const levels = ['4s', '3s', '2s', '1s', 'Ns'];
-        let highest = Math.max(...proficiencyPercentages);
-        let lowest = Math.min(...proficiencyPercentages);
-        let highestIndex = proficiencyPercentages.indexOf(highest.toString());
-        let lowestIndex = proficiencyPercentages.indexOf(lowest.toString());
+    function generateInsights(proficiencyPercentages, labels) {
+        let percentages = proficiencyPercentages.map(Number);
+        
+        let highest = Math.max(...percentages);
+        let lowest = Math.min(...percentages);
+
+        let highestIndex = percentages.indexOf(highest);
+        let lowestIndex = percentages.indexOf(lowest);
 
         let insights = `
-            The highest percentage is ${highest}% for ${levels[highestIndex]}.
-            The lowest percentage is ${lowest}% for ${levels[lowestIndex]}.
+            The highest percentage is ${highest}% for ${labels[highestIndex]}.
+            The lowest percentage is ${lowest}% for ${labels[lowestIndex]}.
         `;
 
         // Check for patterns
