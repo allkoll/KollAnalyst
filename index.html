@@ -38,11 +38,18 @@
             padding: 10px;
             cursor: pointer;
         }
+        #insights {
+            margin-top: 20px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
 
 <h2>KollAnalyst - Proficiency Level Distribution</h2>
+
+<label for="assessment-name">Assessment Name:</label>
+<input type="text" id="assessment-name" placeholder="Enter assessment name" style="margin-bottom: 20px;">
 
 <table id="teacher-table">
     <thead>
@@ -74,6 +81,8 @@
     <div id="graph"></div>
 </div>
 
+<div id="insights"></div>
+
 <script>
     let teacherCount = 1;
 
@@ -94,6 +103,8 @@
     }
 
     function updateGraph() {
+        const assessmentName = document.getElementById('assessment-name').value || 'Assessment';
+
         let totalFours = 0;
         let totalThrees = 0;
         let totalTwos = 0;
@@ -131,11 +142,39 @@
         }];
 
         const layout = {
-            title: 'Proficiency Level Distribution (%)',
+            title: assessmentName + ' - Proficiency Level Distribution (%)',
             showlegend: true
         };
 
         Plotly.newPlot('graph', data, layout);
+
+        generateInsights(proficiencyPercentages);
+    }
+
+    function generateInsights(proficiencyPercentages) {
+        const levels = ['4s', '3s', '2s', '1s', 'Ns'];
+        let highest = Math.max(...proficiencyPercentages);
+        let lowest = Math.min(...proficiencyPercentages);
+        let highestIndex = proficiencyPercentages.indexOf(highest.toString());
+        let lowestIndex = proficiencyPercentages.indexOf(lowest.toString());
+
+        let insights = `
+            The highest percentage is ${highest}% for ${levels[highestIndex]}.
+            The lowest percentage is ${lowest}% for ${levels[lowestIndex]}.
+        `;
+
+        // Check for patterns
+        if (highestIndex === 0) {
+            insights += ' Most students are scoring at the highest proficiency level (4s).';
+        } else if (lowestIndex === 0) {
+            insights += ' Very few students are achieving the highest proficiency level (4s).';
+        }
+
+        if (lowestIndex === 4) {
+            insights += ' The Ns (no scores) percentage is very low, indicating most students participated.';
+        }
+
+        document.getElementById('insights').innerHTML = insights;
     }
 </script>
 
