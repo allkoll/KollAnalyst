@@ -42,6 +42,10 @@
             margin-top: 20px;
             font-style: italic;
         }
+        .highlight {
+            color: red;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -194,6 +198,15 @@
             The lowest overall percentage is ${overallLowest}% for ${overallLevels[overallLowestIndex]}.<br>
         `;
 
+        // Provide more detailed breakdown for below proficiency
+        let belowProficiencyDetails = teacherProficiencies.map(p => 
+            `<strong>${p.teacher}:</strong> Below proficiency (1s and 2s): ${p.totalBelowProficiency}%.<br>`
+        ).join('');
+
+        let aboveProficiencyDetails = teacherProficiencies.map(p => 
+            `<strong>${p.teacher}:</strong> At or above proficiency (3s and 4s): ${p.totalAtOrAboveProficiency}%.<br>`
+        ).join('');
+
         // Highlight teachers with over 50% of students below proficiency
         if (lowScoringTeachers.length > 0) {
             insights += `<br><strong>Areas of Concern:</strong><br>`;
@@ -205,6 +218,10 @@
             insights += `<br><strong>Areas of Strength:</strong><br>`;
             insights += `Teachers with a majority of students at or above proficiency: ${highScoringTeachers.join(', ')}.<br>`;
         }
+
+        insights += `<br><strong>Detailed Breakdown:</strong><br>`;
+        insights += belowProficiencyDetails;
+        insights += aboveProficiencyDetails;
 
         document.getElementById('insights').innerHTML = insights;
     }
